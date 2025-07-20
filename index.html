@@ -145,7 +145,13 @@
         const chatMessages = document.getElementById('chatMessages');
         const chatForm = document.getElementById('chatForm');
         const userInput = document.getElementById('userInput');
-        const sessionId = 'sess-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+        
+        // Try to get existing sessionId from localStorage, or create new one
+        let sessionId = localStorage.getItem('chatbot_session_id');
+        if (!sessionId) {
+            sessionId = 'sess-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+            localStorage.setItem('chatbot_session_id', sessionId);
+        }
 
         function appendMessage(role, content) {
             const msgDiv = document.createElement('div');
@@ -179,6 +185,25 @@
             const typingIndicator = document.getElementById('typing-indicator');
             if (typingIndicator) {
                 typingIndicator.remove();
+            }
+        }
+
+        // Load conversation history from Supabase
+        async function loadConversationHistory() {
+            try {
+                const res = await fetch(`http://localhost:3000/conversation/${sessionId}`);
+                const data = await res.json();
+                
+                if (data.messages && data.messages.length > 0) {
+                    // Skip the system message and display user/assistant messages
+                    data.messages.forEach(msg => {
+                        if (msg.role !== 'system') {
+                            appendMessage(msg.role, msg.content);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.log('No previous conversation found or error loading history');
             }
         }
 
@@ -219,6 +244,9 @@
                 chatForm.dispatchEvent(new Event('submit'));
             }
         });
+
+        // Load conversation history when page loads
+        loadConversationHistory();
     </script>
 </body>
 </html> 
