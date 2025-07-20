@@ -130,9 +130,35 @@
             0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
             40% { transform: scale(1); opacity: 1; }
         }
+        .test-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .status-message {
+            position: fixed;
+            top: 60px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+        }
     </style>
 </head>
 <body>
+    <button class="test-button" onclick="testSupabase()">Test Supabase</button>
+    <div id="statusMessage" class="status-message" style="display: none;"></div>
+    
     <div class="chat-container">
         <div class="chat-header">🤖 AI Chatbot</div>
         <div class="chat-messages" id="chatMessages"></div>
@@ -145,12 +171,38 @@
         const chatMessages = document.getElementById('chatMessages');
         const chatForm = document.getElementById('chatForm');
         const userInput = document.getElementById('userInput');
+        const statusMessage = document.getElementById('statusMessage');
         
         // Try to get existing sessionId from localStorage, or create new one
         let sessionId = localStorage.getItem('chatbot_session_id');
         if (!sessionId) {
             sessionId = 'sess-' + Date.now() + '-' + Math.floor(Math.random()*10000);
             localStorage.setItem('chatbot_session_id', sessionId);
+        }
+
+        function showStatus(message, isError = false) {
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+            statusMessage.style.background = isError ? 'rgba(220,53,69,0.9)' : 'rgba(40,167,69,0.9)';
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        async function testSupabase() {
+            try {
+                showStatus('Testing Supabase connection...');
+                const response = await fetch('http://localhost:3000/test-supabase');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('✅ Supabase connected successfully!');
+                } else {
+                    showStatus('❌ Supabase error: ' + data.error, true);
+                }
+            } catch (error) {
+                showStatus('❌ Connection failed: ' + error.message, true);
+            }
         }
 
         function appendMessage(role, content) {
