@@ -142,6 +142,18 @@
             cursor: pointer;
             font-size: 12px;
         }
+        .new-conversation-button {
+            position: fixed;
+            top: 20px;
+            left: 150px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
         .status-message {
             position: fixed;
             top: 60px;
@@ -157,6 +169,7 @@
 </head>
 <body>
     <button class="test-button" onclick="testSupabase()">Test Supabase</button>
+    <button class="new-conversation-button" onclick="startNewConversation()">🆕 New Chat</button>
     <div id="statusMessage" class="status-message" style="display: none;"></div>
     
     <div class="chat-container">
@@ -173,11 +186,24 @@
         const userInput = document.getElementById('userInput');
         const statusMessage = document.getElementById('statusMessage');
         
-        // Try to get existing sessionId from localStorage, or create new one
+        // Generate a new conversation ID for each new chat session
+        function generateConversationId() {
+            return 'conv-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+        }
+        
+        // Get or create conversation ID
         let sessionId = localStorage.getItem('chatbot_session_id');
         if (!sessionId) {
-            sessionId = 'sess-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+            sessionId = generateConversationId();
             localStorage.setItem('chatbot_session_id', sessionId);
+        }
+        
+        // Add a button to start a new conversation
+        function startNewConversation() {
+            sessionId = generateConversationId();
+            localStorage.setItem('chatbot_session_id', sessionId);
+            chatMessages.innerHTML = '';
+            showStatus('🆕 New conversation started!');
         }
 
         function showStatus(message, isError = false) {
