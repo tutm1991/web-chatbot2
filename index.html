@@ -186,18 +186,19 @@
         const userInput = document.getElementById('userInput');
         const statusMessage = document.getElementById('statusMessage');
         
-        // Generate a new conversation ID for each new chat session
+        // Tạo conversation_id mới mỗi khi bắt đầu cuộc trò chuyện mới
         function generateConversationId() {
             return 'conv-' + Date.now() + '-' + Math.floor(Math.random()*10000);
         }
         
-        // Get or create conversation ID
+        // Lưu sessionId vào localStorage, nhưng chỉ tạo mới khi chat box trống
         let sessionId = localStorage.getItem('chatbot_session_id');
-        if (!sessionId) {
+        
+        function resetSessionId() {
             sessionId = generateConversationId();
             localStorage.setItem('chatbot_session_id', sessionId);
         }
-        
+
         // Add a button to start a new conversation
         function startNewConversation() {
             sessionId = generateConversationId();
@@ -289,6 +290,11 @@
             e.preventDefault();
             const text = userInput.value.trim();
             if (!text) return;
+            
+            // Nếu chat box trống, tạo conversation_id mới
+            if (chatMessages.innerHTML.trim() === '') {
+                resetSessionId();
+            }
             
             appendMessage('user', text);
             userInput.value = '';
